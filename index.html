@@ -1,17 +1,61 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://cdn.jsdelivr.net/npm/p5@1.5.0/lib/p5.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <title>Experimental Design</title>
-  </head>
-  <body class="min-h-screen w-full">
-    <h1 class="text-3xl font-bold underline">Experimental Design</h1>
-    <div style="height: 600px; width:600px;" class="flex flex-row gap-5 snap-x snap-mandatory m-auto overflow-x-scroll overflow-y-hidden border-4">
-      <div id="view" component="view" class="snap-center"></div>
-      <div id="view2" component="view" class="snap-center"></div>
-      <div id="view55" component="view" class="snap-center"></div>
-    </div>
-  </body>
-  <script src="sketch.js"></script>
+
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.5.0/lib/p5.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Experimental Design</title>
+</head>
+
+<body class="min-h-screen w-full">
+  <h1 class="text-3xl font-bold underline">Experimental Design</h1>
+  <div style="height: 600px; width:600px;"
+    class="flex flex-row gap-5 snap-x snap-mandatory m-auto overflow-x-scroll overflow-y-hidden border-4">
+    <div id="view" component="view" class="snap-center"></div>
+    <div id="view2" component="view" class="snap-center"></div>
+    <div id="view55" component="view" class="snap-center"></div>
+  </div>
+</body>
+<script>
+  const {
+    random,
+    floor
+  } = Math;
+
+  const randomBetween = (min, max) => random() * (max - min) + min;
+
+  const defaultCanvas = (p, node) => {
+    p.createCanvas(600, 600);
+    p.fill("black");
+    p.text(node.id, 10, p.height - 30);
+  }
+
+  const drawings = {
+    "view": node => p => {
+      p.setup = () => defaultCanvas(p, node);
+
+      p.draw = () => {
+        let ellipseWidth = 60;
+        let ellipseHeight = ellipseWidth;
+
+        p.noStroke();
+        p.fill(`#${floor(random() * 16777215).toString(16)}`);
+
+        if (p.mouseIsPressed) {
+          ellipseWidth = randomBetween(ellipseWidth / 1.2, ellipseWidth * 1.2);
+          ellipseHeight = ellipseWidth;
+        }
+
+        p.ellipse(p.mouseX, p.mouseY, ellipseWidth, ellipseHeight);
+      }
+    }
+  }
+
+  const testElements = document.querySelectorAll("[component]");
+
+  Array.prototype.forEach.call(testElements, function (node) {
+    new p5(drawings[node.getAttribute("component")](node), node.id)
+  })
+</script>
+
 </html>
