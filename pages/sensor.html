@@ -1,55 +1,113 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Experimental Design - Sensor</title>
-    <meta name="viewport" content = "width = device-width, initial-scale = 1, user-scalable = no" />
 
-    <script src="https://cdn.jsdelivr.net/npm/p5@1.5.0/lib/p5.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../libraries/gyro.js"></script>
-  </head>
+<head>
+  <title>Experimental Design - Sensor</title>
+  <meta name="viewport" content="width = device-width, initial-scale = 1, user-scalable = no" />
 
-  <body class="flex flex-col w-full items-center">
-    <div id='myContainer'></div>
-    <div class="flex flex-row justify-between w-full">
-      <p id="showdata">clicked?</p>
-      <button class="w-full bg-gray-100 mx-2" onclick="touchStarted()">Begin</button>
-    </div>
-  </body>
-  
-  <script>
-    sensor.threshold = 1
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.5.0/lib/p5.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../libraries/mqtt.min.js"></script>
+  <script src="../libraries/itu_mqtt_config.js"></script>
+  <script src="../libraries/gyro.js"></script>
+</head>
 
-    const coords = {
-      x: 250,
-      y: 250
+<body class="flex flex-col w-full items-center">
+  <div id='myContainer'></div>
+  <div class="flex flex-row justify-between w-full">
+    <p id="showdata">clicked?</p>
+    <button class="w-full bg-gray-100 mx-2" onclick="touchStarted()">Begin</button>
+  </div>
+</body>
+
+<script>
+  const myTopic = "gruppe21";
+
+  sensor.threshold = 1
+
+  const coords = {
+    x: 250,
+    y: 250
+  }
+
+
+  let circleColor = "white"
+  const circleSize = 50
+  const circleRadius = circleSize / 2
+  const screenHeight = screen.availHeight - 200
+  const screenWidth = screen.availWidth - 10
+  const isOverCircle = false
+
+  function clamp(number, min, max) {
+    return Math.max(min, Math.min(number, max));
+  }
+
+  function setup() {
+    let myCanvas = createCanvas(screenWidth, screenHeight)
+    myCanvas.parent('myContainer');
+  }
+
+  const bgColor = "lightblue"
+  const lampSize = 60
+
+  let previousHoveringOver = null
+
+  const circles = [
+    {
+      x: 90,
+      y: 90,
+      color: "blue"
+    },
+    {
+      x: 200,
+      y: 90,
+      color: "yellow"
+    },
+    {
+      x: 120,
+      y: 250,
+      color: "pink"
     }
+  ]
 
-    const bgColor = "green"
-    const circleSize = 50
-    const screenHeight = screen.availHeight - 200
-    const screenWidth = screen.availWidth - 10
+  function draw() {
+    background(bgColor)
 
-    function clamp(number, min, max) {
-      return Math.max(min, Math.min(number, max));
-    }
+    circles.forEach(c => {
+      fill(c.color)
+      circle(c.x, c.y, circleSize)
+    })
 
-    function setup() {
-      let myCanvas = createCanvas(screenWidth, screenHeight)
-      myCanvas.parent('myContainer');
-      background(bgColor)
-      circle(coords.x, coords.y, circleSize)
-    }
+    if (sensor.hasNewValue) {
+      coords.x = clamp(coords.x + sensor.z, 0, screenWidth)
+      coords.y = clamp(coords.y + sensor.y, 0, screenHeight)
 
-    function draw() {
-      if (sensor.hasNewValue){
-        background(bgColor)
-        stroke("black")
+      let hoveringOver = null
 
-        coords.x = clamp(coords.x + sensor.z, 0, screenWidth)
-        coords.y = clamp(coords.y + sensor.y, 0, screenHeight)
-        circle(coords.x, coords.y, circleSize) 
+      // Check if we're hovering over a circle
+      circles.forEach(c => {
+        const distance = dist(coords.x, coords.y, c.x, c.y)
+        if (distance < circleRadius) {
+          hoveringOver = c.color
+        }
+      })
+
+      if (hoveringOver && hoveringOver !== previousHoveringOver) {
+        sendMessage(hoveringOver)
       }
+
+      if (hoveringOver) {
+        circleColor = hoveringOver
+      } else {
+        circleColor = "white"
+      }
+
+      previousHoveringOver = hoveringOver
     }
-  </script>
+
+    fill(circleColor)
+    circle(coords.x, coords.y, circleSize)
+  }
+</script>
+
 </html>

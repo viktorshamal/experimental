@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Experimental Design - Sensor</title>
+    <meta name="viewport" content="width = device-width, initial-scale = 1, user-scalable = no" />
+
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.5.0/lib/p5.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../libraries/mqtt.min.js"></script>
+    <script src="../libraries/itu_mqtt_config.js"></script>
+    <script src="../libraries/gyro.js"></script>
+</head>
+
+<body class="flex flex-col w-full items-center bg-black">
+    <img id="lamp-on" class="hidden" src="https://c8.alamy.com/zooms/9/e7e276a7732e41869424c170127512a1/pw7c9y.jpg"/>
+</body>
+
+<script>
+    const params = new Proxy(new URLSearchParams(window.location.search), {
+        get: (searchParams, prop) => searchParams.get(prop),
+    });
+
+    const myTopic = "gruppe21"
+
+    let on = false
+    const onColor = "yellow"
+    const offColor = "white"
+
+    client.on('message', function (topic, message) {
+        let msg = JSON.parse(message)
+
+        console.log(msg)
+
+        if(msg === params.lamp) {
+            var element = document.getElementById("lamp-on");
+            element.classList.toggle("hidden");
+        }
+    });
+
+</script>
