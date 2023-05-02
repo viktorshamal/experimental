@@ -14,6 +14,7 @@
 
 <body class="flex flex-col w-full items-center bg-black">
     <img id="lamp-on" class="hidden" src="https://c8.alamy.com/zooms/9/e7e276a7732e41869424c170127512a1/pw7c9y.jpg"/>
+    <img id="disco-on" class="hidden" src="https://i.gifer.com/origin/a7/a756daa8dc16e1b460f2ed1b10032ba3_w200.webp"/>
 </body>
 
 <script>
@@ -27,6 +28,11 @@
         let msg = JSON.parse(message)
 
         console.log(msg)
+
+        if(msg === "disco") {
+            var element = document.getElementById("disco-on");
+            element.classList.toggle("hidden");
+        }
 
         if(msg === params.lamp) {
             var element = document.getElementById("lamp-on");
