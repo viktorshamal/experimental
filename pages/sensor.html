@@ -27,6 +27,10 @@
     return Math.max(min, Math.min(number, max));
   }
 
+  function randomNumber(max) {
+    return Math.floor(Math.random() * max);
+  }
+
   sensor.threshold = 0
 
   const coords = {
@@ -54,21 +58,27 @@
   const circles = [
     {
       size: 80,
-      x: 90,
-      y: 90,
+      x: randomNumber(screenWidth-80),
+      y: randomNumber(screenHeight-80),
       color: "blue"
     },
     {
       size: 80,
-      x: 200,
-      y: 90,
+      x: randomNumber(screenWidth-80),
+      y: randomNumber(screenHeight-80),
       color: "yellow"
     },
     {
       size: 80,
-      x: 120,
-      y: 250,
+      x: randomNumber(screenWidth-80),
+      y: randomNumber(screenHeight-80),
       color: "pink"
+    },
+    {
+      size: 80,
+      x: randomNumber(screenWidth-80),
+      y: randomNumber(screenHeight-80),
+      color: "orange"
     }
   ]
 
@@ -91,6 +101,8 @@
         const distance = dist(coords.x, coords.y, c.x, c.y)
         if (distance < c.size / 2) {
           hoveringOver = c.color
+          c.x = randomNumber(screenWidth)
+          c.y = randomNumber(screenHeight)
         }
       })
 
