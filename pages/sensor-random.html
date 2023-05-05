@@ -9,7 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="../libraries/mqtt.min.js"></script>
   <script src="../libraries/itu_mqtt_config.js"></script>
-  <script src="../libraries/gyro.js"></script>
+  <script src="../libraries/motion.js"></script>
 </head>
 
 <body class="flex flex-col w-full items-center">
@@ -66,7 +66,7 @@
     size: 50
   }
 
-  sensor.threshold = 0
+  sensor.threshold = 1000
 
   const discoRect = {
     x: screenWidth - 200,
@@ -83,6 +83,16 @@
 
   let previousHoveredLamp = null
 
+  // Variables to store velocity of the energy, along with deacceleration constants
+  let vx = 0
+  let vy = 0
+  const speed = 15
+  const deacceleration = 0.95
+
+  // Debouce the shake event
+  let lastShake = 0
+  const debounce = 1000
+
   function draw() {
     background(bgColor)
 
@@ -96,11 +106,28 @@
       circle(l.x, l.y, l.size)
     })
 
-    if(sensor.hasNewValue){
-      // Move the circle according to the sensor
-      energy.x = clamp(energy.x + sensor.x * 0.01, 0, screenWidth)
-      energy.y = clamp(energy.y + sensor.y * 0.01, 0, screenHeight)
+    if(sensor.hasNewValue && lastShake + debounce < Date.now()){
+      // check if we have shaken the phone by comparing the current value with the previous value
+      // if the difference is greater than the shaken threshold, we have shaken the phone
+
+      // Set a random velocity for the energy and make it deaccelerate
+      vx = (randomNumber(10) - 5)
+      vy = (randomNumber(10) - 5)
+      lastShake = Date.now()
     }
+
+    // Move the energy
+    energy.x += vx * speed
+    energy.y += vy * speed
+
+    // Deaccelerate the energy
+    vx *= deacceleration
+    vy *= deacceleration
+
+    // Bounce the energy off the walls
+    if (energy.x < 0 || energy.x > screenWidth) vx *= -1
+    if (energy.y < 0 || energy.y > screenHeight) vy *= -1
+
 
     // Check what we're hovering over
     let hoveredLamp = null
