@@ -98,8 +98,8 @@
 
     if(sensor.hasNewValue){
       // Move the circle according to the sensor
-      energy.x = clamp(energy.x + sensor.x * 0.01, 0, screenWidth)
-      energy.y = clamp(energy.y + sensor.y * 0.01, 0, screenHeight)
+      energy.x = clamp(energy.x + sensor.x, 0, screenWidth)
+      energy.y = clamp(energy.y + sensor.y, 0, screenHeight)
     }
 
     // Check what we're hovering over
