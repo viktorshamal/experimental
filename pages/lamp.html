@@ -24,20 +24,50 @@
 
     const myTopic = "gruppe21"
 
-    client.on('message', function (topic, message) {
-        let msg = JSON.parse(message)
+    client.subscribe("gruppe21shake")
 
-        console.log(msg)
-
+    function onMessage(msg) {
         if(msg === "disco") {
             var element = document.getElementById("disco-on");
-            element.classList.toggle("hidden");
+            return element.classList.toggle("hidden");
         }
 
         if(msg === params.lamp) {
             var element = document.getElementById("lamp-on");
-            element.classList.toggle("hidden");
+            return element.classList.toggle("hidden");
         }
+    }
+
+    const shakers = {}
+
+    function onShake(msg) {
+        shakers[msg] = Date.now()
+        console.log(shakers)
+    }
+
+    setInterval(() => {
+        const entries = Object.entries(shakers)
+
+        let recentShakers = entries.filter(([id, time]) => Date.now() - time < 10000)
+
+        console.log(recentShakers)
+
+        const anyShakers = recentShakers.length > 0
+        const allRecentShaking = recentShakers.every(([id, time]) => Date.now() - time < 1000)
+        const visible = anyShakers && allRecentShaking
+
+        const element = document.getElementById("disco-on");
+
+        element.classList.toggle("hidden", !visible);
+    }, 1000)
+
+    client.on('message', function (topic, message) {
+        let msg = JSON.parse(message)
+        console.log(topic, msg)
+
+        if(msg.startsWith("shake")) return onShake(msg)
+
+        if(topic === "gruppe21") onMessage(msg)
     });
 
 </script>
