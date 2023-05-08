@@ -54,7 +54,11 @@
   const energy = {
     x: 250,
     y: 250,
-    size: 50
+    size: 50,
+    move: function ({ x,y }) {
+      this.x = clamp(this.x + x, 0, screenWidth)
+      this.y = clamp(this.y + y, 0, screenHeight)
+    }
   }
 
   sensor.threshold = 0
@@ -77,14 +81,13 @@
     })
 
     // Move the circle according to the sensor
-    energy.x = clamp(energy.x + sensor.z, 0, screenWidth)
-    energy.y = clamp(energy.y + sensor.y, 0, screenHeight)
+    energy.move({ x: sensor.z, y: sensor.y })
 
     // Check what we're hovering over
-    let hoveredLamp = lamps.find(lamp => lamp.contains(energy))
+    const hoveredLamp = lamps.find(lamp => lamp.contains(energy))
 
     // Check if we're hovering over a new lamp
-    let hoverEnter = hoveredLamp !== previousHoveredLamp
+    const hoverEnter = hoveredLamp !== previousHoveredLamp
     previousHoveredLamp = hoveredLamp
 
     let circleColor = defaultCircleColor
