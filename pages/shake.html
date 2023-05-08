@@ -32,6 +32,16 @@
     myCanvas.parent('myContainer');
   }
 
+  const energy = {
+    x: 250,
+    y: 250,
+    size: 50,
+    move: function ({ x,y }) {
+      this.x = clamp(this.x + x, 0, screenWidth)
+      this.y = clamp(this.y + y, 0, screenHeight)
+    }
+  }
+
   class Lamp {
     constructor({ x, y, size = 80, color }) {
       this.x = x || randomNumber(screenWidth - size)
@@ -60,11 +70,6 @@
   const bgColor = "lightblue"
   const defaultCircleColor = "white"
   const circleSize = 50
-  const energy = {
-    x: 250,
-    y: 250,
-    size: 50
-  }
 
   sensor.threshold = 1000
 
@@ -76,9 +81,11 @@
   }
 
   const lamps = [
-    new Lamp({ color: "blue", size: 40 }),
+    new Lamp({ color: "blue" }),
     new Lamp({ color: "pink" }),
     new Lamp({ color: "yellow" }),
+    new Lamp({ color: "pink" }),
+    new Lamp({ color: "yellow" })
   ]
 
   let previousHoveredLamp = null
@@ -86,8 +93,8 @@
   // Variables to store velocity of the energy, along with deacceleration constants
   let vx = 0
   let vy = 0
-  const speed = 15
-  const deacceleration = 0.95
+  const speed = 150
+  const deacceleration = 0.97
 
   // Debouce the shake event
   let lastShake = 0
@@ -98,7 +105,6 @@
 
     // Draw the disco rect
     fill('white')
-    rect(discoRect.x, discoRect.y, discoRect.width, discoRect.height)
 
     // Draw the circles
     lamps.forEach(l => {
@@ -106,32 +112,34 @@
       circle(l.x, l.y, l.size)
     })
 
-    if(sensor.hasNewValue && lastShake + debounce < Date.now()){
+    let shakeAvailable = lastShake + debounce < Date.now()
+    if(sensor.hasNewValue && shakeAvailable) {
       // check if we have shaken the phone by comparing the current value with the previous value
       // if the difference is greater than the shaken threshold, we have shaken the phone
 
       // Set a random velocity for the energy and make it deaccelerate
-      vx = (randomNumber(10) - 5)
-      vy = (randomNumber(10) - 5)
+      vx = Math.random() * speed
+      vy = Math.random() * speed
       lastShake = Date.now()
     }
 
     // Move the energy
-    energy.x += vx * speed
-    energy.y += vy * speed
+    energy.move({ x: vx, y: vy })
 
     // Deaccelerate the energy
     vx *= deacceleration
     vy *= deacceleration
 
     // Bounce the energy off the walls
-    if (energy.x < 0 || energy.x > screenWidth) vx *= -1
-    if (energy.y < 0 || energy.y > screenHeight) vy *= -1
-
+    if (energy.x <= 0 || energy.x >= screenWidth) vx *= -1
+    if (energy.y <= 0 || energy.y >= screenHeight) vy *= -1
 
     // Check what we're hovering over
-    let hoveredLamp = null
-    hoveredLamp = lamps.find(lamp => lamp.contains(energy))
+    const hoveredLamp = lamps.find(lamp => lamp.contains(energy))
+
+    // Check if we're hovering over a new lamp
+    const hoverEnter = hoveredLamp !== previousHoveredLamp
+    previousHoveredLamp = hoveredLamp
 
     let circleColor = defaultCircleColor
 
@@ -143,16 +151,9 @@
       hoveredLamp.x = randomNumber(screenWidth)
       hoveredLamp.y = randomNumber(screenHeight)
 
-      let hoverEnter = hoveredLamp !== previousHoveredLamp
-      if (hoverEnter) {
-        sendMessage(hoveredLamp.color)
-        previousHoveredLamp = hoveredLamp
-      }
+      // Only send a message if we're hovering over a new lamp
+      if (hoverEnter) sendMessage(hoveredLamp.color)
     }
-
-    // If every circle is inside the disco rect, send a message
-    let allLampsInsideDisco = lamps.every(lamp => lamp.withinRect(discoRect))
-    if (allLampsInsideDisco) sendMessage("disco")
 
     fill(circleColor)
     circle(energy.x, energy.y, energy.size)
