@@ -59,11 +59,10 @@
 
   sensor.threshold = 0
 
-
   const lamps = [
-    new Lamp({ color: "blue", size: 40 }),
-    new Lamp({ color: "pink" }),
-    new Lamp({ color: "yellow" }),
+    new Lamp({ color: "blue", size: 80, x: 50, y: 100 }),
+    new Lamp({ color: "pink", size: 70, x: 250, y: 100 }),
+    new Lamp({ color: "yellow", size: 90, x: 50, y: 400 }),
   ]
 
   let previousHoveredLamp = null
@@ -71,22 +70,22 @@
   function draw() {
     background(bgColor)
 
-
     // Draw the circles
     lamps.forEach(l => {
       fill(l.color)
       circle(l.x, l.y, l.size)
     })
 
-    if(sensor.hasNewValue){
-      // Move the circle according to the sensor
-      energy.x = clamp(energy.x + sensor.z, 0, screenWidth)
-      energy.y = clamp(energy.y + sensor.y, 0, screenHeight)
-    }
+    // Move the circle according to the sensor
+    energy.x = clamp(energy.x + sensor.z, 0, screenWidth)
+    energy.y = clamp(energy.y + sensor.y, 0, screenHeight)
 
     // Check what we're hovering over
-    let hoveredLamp = null
-    hoveredLamp = lamps.find(lamp => lamp.contains(energy))
+    let hoveredLamp = lamps.find(lamp => lamp.contains(energy))
+
+    // Check if we're hovering over a new lamp
+    let hoverEnter = hoveredLamp !== previousHoveredLamp
+    previousHoveredLamp = hoveredLamp
 
     let circleColor = defaultCircleColor
 
@@ -95,14 +94,8 @@
     if (hoveredLamp) {
       circleColor = hoveredLamp.color
 
-      hoveredLamp.x = randomNumber(screenWidth)
-      hoveredLamp.y = randomNumber(screenHeight)
-
-      let hoverEnter = hoveredLamp !== previousHoveredLamp
-      if (hoverEnter) {
-        sendMessage(hoveredLamp.color)
-        previousHoveredLamp = hoveredLamp
-      }
+      // Only send a message if we're hovering over a new lamp
+      if (hoverEnter) sendMessage(hoveredLamp.color)
     }
 
     fill(circleColor)
