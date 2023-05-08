@@ -44,15 +44,6 @@
       const distance = dist(point.x, point.y, this.x, this.y)
       return distance < this.size / 2
     }
-
-    withinRect = (rect) => {
-      return (
-        this.x >= rect.x &&
-        this.x <= rect.x + rect.width &&
-        this.y >= rect.y &&
-        this.y <= rect.y + rect.height
-      )
-    }
   }
 </script>
 <script>
@@ -68,12 +59,6 @@
 
   sensor.threshold = 0
 
-  const discoRect = {
-    x: screenWidth - 200,
-    y: screenHeight - 100,
-    width: 200,
-    height: 100
-  }
 
   const lamps = [
     new Lamp({ color: "blue", size: 40 }),
@@ -86,9 +71,6 @@
   function draw() {
     background(bgColor)
 
-    // Draw the disco rect
-    fill('white')
-    rect(discoRect.x, discoRect.y, discoRect.width, discoRect.height)
 
     // Draw the circles
     lamps.forEach(l => {
@@ -122,10 +104,6 @@
         previousHoveredLamp = hoveredLamp
       }
     }
-
-    // If every circle is inside the disco rect, send a message
-    let allLampsInsideDisco = lamps.every(lamp => lamp.withinRect(discoRect))
-    if (allLampsInsideDisco) sendMessage("disco")
 
     fill(circleColor)
     circle(energy.x, energy.y, energy.size)
